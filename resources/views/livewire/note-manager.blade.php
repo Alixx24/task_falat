@@ -95,8 +95,7 @@
                     <form wire:submit.prevent="saveNote" enctype="multipart/form-data">
 
                         <div class="mb-3">
-                            <input type="text" wire:model="title" class="form-control" placeholder="عنوان یادداشت"
-                                required>
+                            <input type="text" wire:model="title" class="form-control" placeholder="عنوان یادداشت" required>
                         </div>
 
                         <div class="mb-3">
@@ -108,6 +107,26 @@
                             <input type="file" wire:model="newFiles" multiple>
                             @error('newFiles.*') <span class="text-danger">{{ $message }}</span> @enderror
                         </div>
+
+                        <!-- فایل‌های موجود در صورت ویرایش -->
+                        @if($selectedNote)
+                            <div class="mb-3">
+                                <label class="form-label">فایل‌های موجود</label>
+                                <ul class="list-group">
+                                    @foreach(\App\Models\Note::find($selectedNote)->files as $file)
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <a href="{{ asset('storage/'.$file->file_path) }}" target="_blank">
+                                                {{ $file->file_name }}
+                                            </a>
+                                            <button type="button" class="btn btn-sm btn-danger"
+                                                wire:click="markFileDeleted({{ $file->id }})">
+                                                حذف
+                                            </button>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
 
                         <div class="mb-3">
                             <label for="status" class="form-label">وضعیت</label>
@@ -121,8 +140,7 @@
                             <button type="submit" class="btn btn-primary">
                                 {{ $selectedNote ? 'ذخیره تغییرات' : 'ذخیره یادداشت' }}
                             </button>
-                            <button type="button" wire:click="resetForm" class="btn btn-secondary"
-                                data-bs-dismiss="modal">
+                            <button type="button" wire:click="resetForm" class="btn btn-secondary" data-bs-dismiss="modal">
                                 بستن
                             </button>
                         </div>
