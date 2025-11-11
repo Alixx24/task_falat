@@ -1,13 +1,20 @@
 <div class="container mt-4">
 
-    <!-- دکمه افزودن یادداشت جدید -->
-    <div class="mb-3">
-        <button wire:click="resetFormAndOpenModal" class="btn btn-success">
-            افزودن یادداشت جدید
-        </button>
-    </div>
 
-    <!-- فیلتر بر اساس کاربر -->
+<div class="mb-3 d-flex gap-2 align-items-center">
+ 
+    <button wire:click="resetFormAndOpenModal" class="btn btn-success bg-dark">
+   <i class="bi bi-plus-circle-dotted fs-2"></i>
+    </button>
+
+    <!-- search -->
+    <input type="text" 
+           wire:model.live.debounce.300ms="search" 
+           placeholder="عنوان را جستجو کنید"
+           class="form-control form-control-lg rounded-pill shadow-sm flex-grow-1">
+</div>
+
+    <!-- select name -->
     <div class="mb-3">
         <label for="userSelect" class="form-label">یک کاربر را انتخاب کنید</label>
         <select wire:model="selectedUser" id="userSelect" class="form-select">
@@ -20,13 +27,13 @@
         </select>
     </div>
 
-    <!-- جستجوی زنده بر اساس نام نویسنده -->
-    <div class="mb-3">
-        <input type="text" wire:model.live.debounce.300ms="search" placeholder="نام نویسنده را جستجو کنید"
-            class="form-control form-control-lg rounded-pill shadow-sm">
-    </div>
-
-    <h3>یادداشت‌ها:</h3>
+  
+    <select wire:model.number="sortStatus" wire:change="loadNotes" class="form-select">
+        <option value="">همه</option>
+        <option value="2">انجام‌نشده</option>
+        <option value="1">انجام‌شده</option>
+    </select>
+    <br>
 
     @if ($notes->isEmpty())
         <div class="alert alert-info text-center">
@@ -36,11 +43,12 @@
         <div class="row">
             @foreach ($notes as $note)
                 <div class="col-md-4 mb-3">
-                    <div class="card shadow-sm
-                        @if ($note->status == 'انجام‌شده') bg-success text-white
-                        @elseif($note->status == 'انجام‌نشده') bg-warning text-dark @endif">
+                    <div
+                        class="card shadow-sm
+                @if ($note->status == '1') bg-success text-white
+                @elseif($note->status == '2') bg-warning text-dark @endif">
 
-                        <div class="card-body">
+                        <div class="card-body position-relative">
                             <h5 class="card-title">{{ $note->title }}</h5>
 
                             <h6 class="text-muted mb-2">
@@ -50,37 +58,59 @@
 
                             <p class="card-text">{{ Str::limit($note->content, 100) }}</p>
 
-                            <div class="d-flex justify-content-between align-items-center mt-3">
-                                <div class="d-flex align-items-center">
-                                    <span class="me-2 fw-bold">وضعیت:</span>
-                                    <select wire:change="updateStatus({{ $note->id }}, $event.target.value)"
-                                        class="form-select form-select-sm w-auto">
-                                        <option value="انجام‌نشده"
-                                            {{ $note->status == 'انجام‌نشده' ? 'selected' : '' }}>انجام‌نشده</option>
-                                        <option value="انجام‌شده" {{ $note->status == 'انجام‌شده' ? 'selected' : '' }}>
-                                            انجام‌شده</option>
-                                    </select>
-                                </div>
 
-                                <div>
-                                    <button wire:click="edit({{ $note->id }})" class="btn btn-primary btn-sm">
-                                        ویرایش
-                                    </button>
-                                    <button wire:click="delete({{ $note->id }})" class="btn btn-danger btn-sm"
-                                        onclick="confirm('آیا مطمئن هستید که می‌خواهید حذف کنید؟') || event.stopImmediatePropagation()">
-                                        حذف
-                                    </button>
-                                </div>
+
+
+
+                            <div class="w-100 mb-2">
+                                <hr class="border-dark">
                             </div>
+
+                            <div>
+                                @if ($note->files->isNotEmpty())
+                                    <div class="mb-2">
+
+                                        <ul class="list-unstyled mb-0">
+                                            @foreach ($note->files as $file)
+                                                <li>
+                                                    {{ $file->file_name }}
+                                                    ({{ number_format($file->file_size / 1024 / 1024, 2) }} MB)
+                                                </li>
+                                            @endforeach
+
+                                        </ul>
+                                    </div>
+                                @endif
+                            </div>
+
+                            <div class="position-absolute top-0 end-0 m-2 d-flex gap-1">
+                                <!-- edit -->
+                                <button wire:click="edit({{ $note->id }})"
+                                    class="btn btn-sm bg-white text-dark border rounded-circle d-flex align-items-center justify-content-center"
+                                    style="width:40px; height:40px; padding:0;">
+                                    <i class="bi bi-pen"></i>
+                                </button>
+
+                                <!-- delete -->
+                                <button wire:click="delete({{ $note->id }})"
+                                    class="btn btn-sm bg-white text-dark border rounded-circle d-flex align-items-center justify-content-center"
+                                    style="width:40px; height:40px; padding:0;"
+                                    onclick="confirm('آیا مطمئن هستید که می‌خواهید حذف کنید؟') || event.stopImmediatePropagation()">
+                                    <i class="bi bi-trash3-fill"></i>
+                                </button>
+                            </div>
+
                         </div>
                     </div>
                 </div>
             @endforeach
         </div>
+
     @endif
 
-    <!-- Modal افزودن/ویرایش یادداشت -->
-    <div class="modal fade" id="noteModal" tabindex="-1" aria-labelledby="noteModalLabel" aria-hidden="true" wire:ignore.self>
+    <!-- modal /edit -->
+    <div class="modal fade" id="noteModal" tabindex="-1" aria-labelledby="noteModalLabel" aria-hidden="true"
+        wire:ignore.self>
         <div class="modal-dialog">
             <div class="modal-content">
 
@@ -95,27 +125,31 @@
                     <form wire:submit.prevent="saveNote" enctype="multipart/form-data">
 
                         <div class="mb-3">
-                            <input type="text" wire:model="title" class="form-control" placeholder="عنوان یادداشت" required>
+                            <input type="text" wire:model="title" class="form-control" placeholder="عنوان یادداشت"
+                                required>
                         </div>
 
                         <div class="mb-3">
                             <textarea wire:model="content" class="form-control" placeholder="متن یادداشت" rows="4" required></textarea>
                         </div>
 
-                        <!-- فایل آپلود -->
+                        <!-- upload -->
                         <div class="mb-3">
                             <input type="file" wire:model="newFiles" multiple>
-                            @error('newFiles.*') <span class="text-danger">{{ $message }}</span> @enderror
+                            @error('newFiles.*')
+                                <span class="text-danger">{{ $message }}</span>
+                            @enderror
                         </div>
 
-                        <!-- فایل‌های موجود در صورت ویرایش -->
-                        @if($selectedNote)
+                        <!-- Files available for editing -->
+
+                        @if ($selectedNote)
                             <div class="mb-3">
                                 <label class="form-label">فایل‌های موجود</label>
                                 <ul class="list-group">
-                                    @foreach(\App\Models\Note::find($selectedNote)->files as $file)
+                                    @foreach (\App\Models\Note::find($selectedNote)->files as $file)
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            <a href="{{ asset('storage/'.$file->file_path) }}" target="_blank">
+                                            <a href="{{ asset('storage/' . $file->file_path) }}" target="_blank">
                                                 {{ $file->file_name }}
                                             </a>
                                             <button type="button" class="btn btn-sm btn-danger"
@@ -131,8 +165,8 @@
                         <div class="mb-3">
                             <label for="status" class="form-label">وضعیت</label>
                             <select wire:model="status" id="status" class="form-select">
-                                <option value="انجام‌نشده">انجام‌نشده</option>
-                                <option value="انجام‌شده">انجام‌شده</option>
+                                <option value="2">انجام‌نشده</option>
+                                <option value="1">انجام‌شده</option>
                             </select>
                         </div>
 
@@ -140,7 +174,8 @@
                             <button type="submit" class="btn btn-primary">
                                 {{ $selectedNote ? 'ذخیره تغییرات' : 'ذخیره یادداشت' }}
                             </button>
-                            <button type="button" wire:click="resetForm" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <button type="button" wire:click="resetForm" class="btn btn-secondary"
+                                data-bs-dismiss="modal">
                                 بستن
                             </button>
                         </div>
@@ -153,7 +188,7 @@
     </div>
 </div>
 
-<!-- کنترل مودال‌ها با Livewire -->
+
 <script>
     document.addEventListener('livewire:init', function() {
         Livewire.on('openModal', () => {

@@ -14,21 +14,21 @@ class NoteManager extends Component
     public $notes = [];
     public $title = '';
     public $content = '';
-    public $status = 'انجام‌نشده';
+    public $status = 2; 
     public $selectedNote = null;
     public $selectedUser = null;
     public $users = [];
     public $search = '';
-
     public $newFiles = [];
     public $deletedFiles = [];
+    public $sortStatus = null;
 
     protected $listeners = ['markFileDeleted'];
 
     protected $rules = [
         'title' => 'required|string|max:255',
         'content' => 'required|string',
-        'status' => 'required|string',
+        'status' => 'required|integer|in:1,2',
         'selectedUser' => 'nullable|exists:users,id',
         'newFiles.*' => 'file|max:10240', // 10MB
     ];
@@ -40,6 +40,7 @@ class NoteManager extends Component
         $this->loadNotes();
     }
 
+    public function updatedSortStatus() { $this->loadNotes(); }
     public function updatedSelectedUser() { $this->loadNotes(); }
     public function updatedSearch() { $this->loadNotes(); }
 
@@ -55,6 +56,10 @@ class NoteManager extends Component
             $query->where('title', 'LIKE', '%' . trim($this->search) . '%');
         }
 
+        if ($this->sortStatus) {
+            $query->where('status', $this->sortStatus);
+        }
+
         $this->notes = $query->orderByDesc('created_at')->get();
     }
 
@@ -62,7 +67,6 @@ class NoteManager extends Component
     {
         $note = Note::findOrFail($id);
 
-        // حذف فایل‌ها از استوریج
         foreach ($note->files as $file) {
             \Storage::disk('public')->delete($file->file_path);
             $file->delete();
@@ -92,58 +96,56 @@ class NoteManager extends Component
         $this->loadNotes();
     }
 
- public function saveNote()
-{
-    $this->validate();
+    public function saveNote()
+    {
+      $result =  $this->validate();
 
-    if ($this->selectedNote) {
-        $note = Note::findOrFail($this->selectedNote);
-        $note->update([
-            'title' => $this->title,
-            'content' => $this->content,
-            'status' => $this->status,
-            'user_id' => $this->selectedUser,
-        ]);
+        if ($this->selectedNote) {
+            $note = Note::findOrFail($this->selectedNote);
+            $note->update([
+                'title' => $this->title,
+                'content' => $this->content,
+                'status' => $this->status,
+                'user_id' => $this->selectedUser,
+            ]);
 
-        // حذف فایل‌های انتخاب شده
-        foreach ($this->deletedFiles as $fileId) {
-            $file = $note->files()->find($fileId);
-            if ($file) {
-                \Storage::disk('public')->delete($file->file_path);
-                $file->delete();
+            foreach ($this->deletedFiles as $fileId) {
+                $file = $note->files()->find($fileId);
+                if ($file) {
+                    \Storage::disk('public')->delete($file->file_path);
+                    $file->delete();
+                }
             }
+            $this->deletedFiles = [];
+        } else {
+            $note = Note::create([
+                'title' => $this->title,
+                'content' => $this->content,
+                'status' => $this->status,
+                'user_id' => $this->selectedUser,
+                'date' => now(),
+            ]);
         }
-        $this->deletedFiles = []; // پاکسازی بعد از حذف
-    } else {
-        $note = Note::create([
-            'title' => $this->title,
-            'content' => $this->content,
-            'status' => $this->status,
-            'user_id' => $this->selectedUser,
-            'date' => now(),
-        ]);
+
+        foreach ($this->newFiles as $uploadedFile) {
+            $path = $uploadedFile->store('note_files', 'public');
+            $note->files()->create([
+                'file_path' => $path,
+                'file_name' => $uploadedFile->getClientOriginalName(),
+                'file_size' => $uploadedFile->getSize(),
+            ]);
+        }
+
+        $this->resetForm();
+        $this->loadNotes();
+        $this->dispatch('closeModal');
     }
-
-    // ذخیره فایل‌های جدید
-    foreach ($this->newFiles as $uploadedFile) {
-        $path = $uploadedFile->store('note_files', 'public');
-        $note->files()->create([
-            'file_path' => $path,
-            'file_name' => $uploadedFile->getClientOriginalName(),
-        ]);
-    }
-
-    $this->resetForm();
-    $this->loadNotes();
-    $this->dispatch('closeModal');
-}
-
 
     public function resetForm()
     {
         $this->title = '';
         $this->content = '';
-        $this->status = 'انجام‌نشده';
+        $this->status = 2;
         $this->selectedNote = null;
         $this->selectedUser = $this->users->first()?->id;
         $this->newFiles = [];

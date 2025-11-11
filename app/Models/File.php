@@ -8,7 +8,7 @@ class File extends Model
 {
      use HasFactory;
 
-    protected $fillable = ['note_id', 'file_path', 'file_name'];
+    protected $fillable = ['note_id', 'file_path', 'file_name', 'file_size'];
 
     
     public function note()

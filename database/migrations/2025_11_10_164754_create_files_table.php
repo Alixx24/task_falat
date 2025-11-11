@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('note_id')->constrained()->onDelete('cascade');
             $table->string('file_path');
             $table->string('file_name');
+             $table->bigInteger('file_size');
             $table->timestamps();
         });
     }
