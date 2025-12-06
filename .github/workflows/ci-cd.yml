@@ -39,7 +39,7 @@ jobs:
 
       # 3. Install Composer dependencies
       - name: Install Composer dependencies
-        working-directory: ./backend
+        working-directory: ./
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
       # 4. Setup Node
