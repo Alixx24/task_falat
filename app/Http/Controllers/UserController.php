@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\UpdateUserRequest;
+use App\Http\Requests\StoreUserRequest;
+
+
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -22,24 +25,24 @@ class UserController extends Controller
 
     //search
 
-public function search(Request $request)
-{
-    $search = $request->search;
+    public function search(Request $request)
+    {
+        $search = $request->search;
 
-    $users = User::query()
-        ->when($search, function ($query) use ($search) {
-            $query->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('mobile', 'like', "%{$search}%");
-        })
-        ->orderBy('id', 'desc')
-        ->get(); //Or paginate(10)
+        $users = User::query()
+            ->when($search, function ($query) use ($search) {
+                $query->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('mobile', 'like', "%{$search}%");
+            })
+            ->orderBy('id', 'desc')
+            ->get(); //Or paginate(10)
 
-    return response()->json([
-        'status' => true,
-        'data' => $users
-    ]);
-}
+        return response()->json([
+            'status' => true,
+            'data' => $users
+        ]);
+    }
 
 
 
@@ -80,6 +83,37 @@ public function search(Request $request)
             'status'  => true,
             'message' => 'User updated successfully',
             'data'    => $user
+        ]);
+    }
+
+    //store
+    public function store(StoreUserRequest $request)
+    {
+        $user = User::create($request->validated());
+
+        return response()->json([
+            'status' => true,
+            'message' => 'User created successfully',
+            'data' => $user
+        ]);
+    }
+
+    public function destroy($id)
+    {
+        $user = User::find($id);
+
+
+        if (!$user) {
+            return response()->json([
+                'status' => false,
+                'message' => 'user not found'
+            ]);
+        }
+
+        $user->delete();
+        return response()->json([
+            'status' => true,
+            'message' => 'User deleted successfully'
         ]);
     }
 }

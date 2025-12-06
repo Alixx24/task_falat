@@ -10,11 +10,17 @@ Route::get('/user', function (Request $request) {
 
 Route::get('/user-list', [UserController::class, 'index']);
 
-// نمایش یک کاربر
+//show
 Route::get('/user/{id}', [UserController::class, 'show']);
 
-// آپدیت یک کاربر
+//update
 Route::put('/user/{id}', [UserController::class, 'update']);
 
 //search
 Route::get('/user-search', [UserController::class, 'search']);
+
+//store
+Route::post('/user', [UserController::class, 'store']);
+
+//delete
+Route::delete('/user/{id}', [UserController::class, 'destroy']);
