@@ -2,10 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    $milwad = app('milwad');
-    dd($milwad);
-});
 
 
 
