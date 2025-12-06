@@ -39,12 +39,12 @@ jobs:
 
       # 3. Install Composer dependencies
       - name: Install Composer dependencies
-        working-directory: ./task
+        working-directory: ./task_falat/task
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
       # 4. Run Laravel tests
       - name: Run Laravel tests
-        working-directory: ./task
+        working-directory: ./task_falat/task
         env:
           DB_CONNECTION: mysql
           DB_HOST: 127.0.0.1
