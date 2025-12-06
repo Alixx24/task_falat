@@ -11,7 +11,7 @@ class UserController extends Controller
     //users list
     public function index()
     {
-        $users = User::select('id','name','email','mobile')->get();
+        $users = User::select('id', 'name', 'email', 'mobile')->get();
 
         return response()->json([
             'status' => true,
@@ -20,10 +20,36 @@ class UserController extends Controller
         ]);
     }
 
+    //search
+
+public function search(Request $request)
+{
+    $search = $request->search;
+
+    $users = User::query()
+        ->when($search, function ($query) use ($search) {
+            $query->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('mobile', 'like', "%{$search}%");
+        })
+        ->orderBy('id', 'desc')
+        ->get(); //Or paginate(10)
+
+    return response()->json([
+        'status' => true,
+        'data' => $users
+    ]);
+}
+
+
+
+
+
+
     // show user
     public function show($id)
     {
-        $user = User::select('id','name','email','mobile')->find($id);
+        $user = User::select('id', 'name', 'email', 'mobile')->find($id);
 
         if (!$user) {
             return response()->json(['message' => 'User not found'], 404);
@@ -36,7 +62,7 @@ class UserController extends Controller
     }
 
     //update user
-   public function update(UpdateUserRequest $request, $id)
+    public function update(UpdateUserRequest $request, $id)
     {
         $user = User::find($id);
 

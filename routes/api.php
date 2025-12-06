@@ -15,3 +15,6 @@ Route::get('/user/{id}', [UserController::class, 'show']);
 
 // آپدیت یک کاربر
 Route::put('/user/{id}', [UserController::class, 'update']);
+
+//search
+Route::get('/user-search', [UserController::class, 'search']);
