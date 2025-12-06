@@ -39,12 +39,12 @@ jobs:
 
       # 3. Install Composer dependencies
       - name: Install Composer dependencies
-        working-directory: ./task_falat/task
+        working-directory: ./Task
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
       # 4. Run Laravel tests
       - name: Run Laravel tests
-        working-directory: ./task_falat/task
+        working-directory: ./Task
         env:
           DB_CONNECTION: mysql
           DB_HOST: 127.0.0.1
@@ -66,6 +66,6 @@ jobs:
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           # انتقال Laravel به سرور
-          rsync -avz --delete ./task/ $REMOTE_USER@$REMOTE_HOST:/var/www/laravel-app/
+          rsync -avz --delete ./Task/ $REMOTE_USER@$REMOTE_HOST:/var/www/laravel-app/
           # اجرای Migration
           ssh $REMOTE_USER@$REMOTE_HOST "cd /var/www/laravel-app && php artisan migrate --force"
