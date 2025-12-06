@@ -50,12 +50,12 @@ jobs:
 
       # 5. Install NPM dependencies
       - name: Install NPM dependencies
-        working-directory: ./frontend
+        working-directory: ./
         run: npm ci
 
       # 6. Run React build
       - name: Build React
-        working-directory: ./frontend
+        working-directory: ./
         run: npm run build
 
       # 7. Run Laravel tests
