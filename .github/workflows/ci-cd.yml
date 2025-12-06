@@ -60,7 +60,7 @@ jobs:
 
       # 7. Run Laravel tests
       - name: Run Laravel tests
-        working-directory: ./backend
+        working-directory: ./
         env:
           DB_CONNECTION: mysql
           DB_HOST: 127.0.0.1
