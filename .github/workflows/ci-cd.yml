@@ -41,11 +41,22 @@ jobs:
           extensions: mbstring, bcmath, mysqli, pdo_mysql, curl, xml
           ini-values: post_max_size=256M, max_execution_time=180
 
- # 4. Install Composer dependencies
+      # 4. Install Composer dependencies
       - name: Install Composer dependencies
-        working-directory: ./Task
+        working-directory: ./
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
-  
+
+      # 5. Setup Node
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+
+      # 7. Build React
+      - name: Build React
+        working-directory: ./
+        run: npm run build
 
       # 8. Run Laravel tests
       - name: Run Laravel tests
