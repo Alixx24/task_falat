@@ -43,6 +43,7 @@ jobs:
 
       # 4. Run Laravel tests
       - name: Run Laravel tests
+        working-directory: ./
         env:
           DB_CONNECTION: mysql
           DB_HOST: 127.0.0.1
@@ -50,7 +51,8 @@ jobs:
           DB_DATABASE: testdb
           DB_USERNAME: root
           DB_PASSWORD: root
-        run: php artisan test --parallel
+        run: php artisan test
+
 
       # 5. Deploy to server
       - name: Deploy to Server
