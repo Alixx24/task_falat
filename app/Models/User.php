@@ -17,8 +17,8 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-      protected $table = 'users';
-    protected $fillable = ['first_name', 'last_name', 'phone_number'];
+    protected $table = 'users';
+    protected $fillable = ['name', 'email', 'mobile'];
 
 
     /**
@@ -44,14 +44,13 @@ class User extends Authenticatable
         ];
     }
 
-     public function notes()
+    public function notes()
     {
-        return $this->hasMany(Note::class); 
+        return $this->hasMany(Note::class);
     }
 
     public function user()
-{
-    return $this->belongsTo(User::class);
-}
-
+    {
+        return $this->belongsTo(User::class);
+    }
 }
