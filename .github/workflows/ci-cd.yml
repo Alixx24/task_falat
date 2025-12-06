@@ -1,4 +1,4 @@
-name: Laravel + React CI/CD
+name: Laravel CI/CD
 
 on:
   push:
@@ -41,12 +41,14 @@ jobs:
           extensions: mbstring, bcmath, mysqli, pdo_mysql, curl, xml
           ini-values: post_max_size=256M, max_execution_time=180
 
+      # 4. Install Composer dependencies
+      - name: Install Composer dependencies
+        working-directory: ./Task
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
-  
-
-      # 8. Run Laravel tests
+      # 5. Run Laravel tests
       - name: Run Laravel tests
-        working-directory: ./
+        working-directory: ./Task
         env:
           DB_CONNECTION: mysql
           DB_HOST: 127.0.0.1
@@ -56,7 +58,7 @@ jobs:
           DB_PASSWORD: root
         run: php artisan test --parallel
 
-      # 9. Deploy (مثال: rsync)
+      # 6. Deploy (مثال: rsync)
       - name: Deploy to Server
         if: github.ref == 'refs/heads/main'
         env:
@@ -67,5 +69,5 @@ jobs:
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          rsync -avz --delete ./ $REMOTE_USER@$REMOTE_HOST:/var/www/laravel-app/
+          rsync -avz --delete ./Task/ $REMOTE_USER@$REMOTE_HOST:/var/www/laravel-app/
           ssh $REMOTE_USER@$REMOTE_HOST "cd /var/www/laravel-app && php artisan migrate --force"
