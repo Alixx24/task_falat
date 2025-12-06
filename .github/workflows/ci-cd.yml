@@ -65,7 +65,5 @@ jobs:
           mkdir -p ~/.ssh
           echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          # انتقال Laravel به سرور
           rsync -avz --delete ./Task/ $REMOTE_USER@$REMOTE_HOST:/var/www/laravel-app/
-          # اجرای Migration
           ssh $REMOTE_USER@$REMOTE_HOST "cd /var/www/laravel-app && php artisan migrate --force"
