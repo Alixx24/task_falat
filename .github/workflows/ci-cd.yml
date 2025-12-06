@@ -51,10 +51,7 @@ jobs:
         
 
 
-      # 7. Build React
-      - name: Build React
-        working-directory: ./
-        run: npm run build
+
 
       # 8. Run Laravel tests
       - name: Run Laravel tests
